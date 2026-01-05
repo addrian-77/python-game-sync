@@ -1,4 +1,5 @@
 import pygame
+from network import Network
 
 width = 500
 height = 500
@@ -9,7 +10,7 @@ def redrawWindow(win, player):
     win.fill((255,255,255))
     
     # extract color
-    color = player["color"]
+    color = [255, 0, 0]
     
     # draw player as a rectangle
     pygame.draw.rect(win, color, (player["x"], player["y"], 50, 50))
@@ -18,6 +19,7 @@ def redrawWindow(win, player):
 
 def main():
     running = True
+    net = Network()
 
     clock = pygame.time.Clock()
     
@@ -53,13 +55,19 @@ def main():
         x = max(0, min(x, 500 - width_p))
         y = max(0, min(y, 500 - height_p))
 
-        player = {
-            "color": [255, 0, 0],
+        packet_to_send = {
             "x" : x,
             "y" : y,
         }
+
+        try:
+            player = net.send(packet_to_send)
+
+            redrawWindow(win, player)
         
-        redrawWindow(win, player)
+        except Exception as e:
+            print("Error:", e)
+            running = False
 
 
 main()
