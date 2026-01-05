@@ -6,20 +6,23 @@ height = 500
 win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("shooter")
 
-def redrawWindow(win, player):
+def redrawWindow(win, players):
     win.fill((255,255,255))
     
-    # extract color
-    color = [255, 0, 0]
-    
-    # draw player as a rectangle
-    pygame.draw.rect(win, color, (player["x"], player["y"], 50, 50))
+    for player in players.values():
+        # extract color
+        color = player["color"]    
+        
+        # draw player as a rectangle
+        pygame.draw.rect(win, color, (player["x"], player["y"], 50, 50))
         
     pygame.display.update()
 
 def main():
     running = True
     net = Network()
+    player_id = net.pid
+    print("pid")
 
     clock = pygame.time.Clock()
     
@@ -61,9 +64,9 @@ def main():
         }
 
         try:
-            player = net.send(packet_to_send)
+            game_state = net.send(packet_to_send)
 
-            redrawWindow(win, player)
+            redrawWindow(win, game_state["players"])
         
         except Exception as e:
             print("Error:", e)

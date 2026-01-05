@@ -10,12 +10,14 @@ class Network:
         self.port = 5555
         self.addr = (self.server, self.port)
         # also call the connect function here
-        self.connect()
+        self.pid = self.connect()
 
     # connect to the network
     def connect(self):
         try:
             self.client.connect(self.addr)
+            # this is the player id, sent by the server on initializing the player
+            return pickle.loads(self.client.recv(4096))
         except:
             pass
     
