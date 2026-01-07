@@ -1,6 +1,7 @@
 import socket
 from _thread import *
 import pickle
+import time
 
 server = "localhost"
 port = 5555
@@ -16,6 +17,28 @@ print("Waiting for connection")
 
 players = {}
 
+bullets = []
+
+BULLET_SPEED = 10
+
+def game_loop():
+    while True:
+        time.sleep(0.016) # 60fps
+
+        # update bullets
+        for b in bullets[:]:
+            b["x"] += b["dir_x"] * BULLET_SPEED
+            b["y"] += b["dir_y"] * BULLET_SPEED
+
+            # remove bullet if it is out of bounds
+            if b["x"] < 0 or b["x"] > 500 or b["y"] < 0 or b["y"] > 500:
+                if b in bullets:
+                    bullets.remove(b)
+                continue
+
+start_new_thread(game_loop, ())
+
+
 def update_player(conn, current_player):
     # initialize the player
     if current_player == 0:
@@ -25,7 +48,9 @@ def update_player(conn, current_player):
     players[current_player] = {
         "x": 250,
         "y": 250,
-        "color": color
+        "color": color,
+        "facing_x": 1,
+        "facing_y": 0
     }
 
     # send the player id on init
@@ -43,9 +68,30 @@ def update_player(conn, current_player):
             # update player
             players[current_player]["x"] = data["x"]
             players[current_player]["y"] = data["y"]
+            players[current_player]["facing_x"] = data["facing"][0]
+            players[current_player]["facing_y"] = data["facing"][1]
+
+            # handle shooting
+            if data["shoot"]:
+                # establish the direction of the bullet
+                dir_x = players[current_player]["facing_x"]
+                dir_y = players[current_player]["facing_y"]
+                
+                # compute the position of the bullet
+                # + 25 to place it at the center of the player
+                bullet_x = players[current_player]["x"] + 25
+                bullet_y = players[current_player]["y"] + 25
+
+                bullets.append({
+                    "x": bullet_x,
+                    "y": bullet_y,
+                    "dir_x": dir_x,
+                    "dir_y": dir_y,
+                    "owner_id": current_player 
+                })
 
             # send back data
-            game_state = {"players": players,}
+            game_state = {"players": players, "bullets": bullets}
             conn.sendall(pickle.dumps(game_state))
         except Exception as e:
             print(e)
