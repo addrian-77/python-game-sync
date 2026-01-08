@@ -2,6 +2,7 @@ import socket
 from _thread import *
 import pickle
 import time
+import random
 
 server = "localhost"
 port = 5555
@@ -36,6 +37,30 @@ def game_loop():
                     bullets.remove(b)
                 continue
 
+            for id in players:
+                # skip, we can't shoot ourselves
+                if id == b["owner_id"]:
+                    continue
+                
+                p = players[id]
+                # check if the bullet intersects the player's hitbox
+                if (p["x"] < b["x"] < p["x"] + 50) and (p["y"] < b["y"] < p["y"] + 50):
+                    # substract 10 hp if the bullet hits
+                    p["hp"] -= 10
+                    # remove the bullet from the list
+                    if b in bullets:
+                        bullets.remove(b)
+
+                    # check if the player died
+                    if p["hp"] <= 0:
+                        if b["owner_id"] in players:
+                            # increase the score
+                            players[b["owner_id"]]["score"] += 1
+                        # reset player's hp
+                        players[id]["hp"] = 100
+                        
+                    break
+
 start_new_thread(game_loop, ())
 
 
@@ -49,6 +74,8 @@ def update_player(conn, current_player):
         "x": 250,
         "y": 250,
         "color": color,
+        "hp": 100,
+        "score": 0,
         "facing_x": 1,
         "facing_y": 0
     }

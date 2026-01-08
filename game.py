@@ -6,19 +6,38 @@ height = 500
 win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("shooter")
 
-def redrawWindow(win, players, bullets):
+pygame.font.init()
+font = pygame.font.SysFont("arialblack", 30)
+
+def redrawWindow(win, players, bullets, my_id):
     win.fill((255,255,255))
     
     # draw bullets as circles
     for b in bullets:
         pygame.draw.circle(win, (0, 0, 0), (int(b["x"]), int(b["y"])), 5)
 
-    for player in players.values():
+    for id, player in players.items():
         # extract color
         color = player["color"]    
         
         # draw player as a rectangle
         pygame.draw.rect(win, color, (player["x"], player["y"], 50, 50))
+
+        # draw a healthbar
+        # first draw a full red rectangle, then draw green over it
+        pygame.draw.rect(win, (255, 0, 0), (player["x"], player["y"] - 10, 50, 5))
+        hp_percent = max(0, player["hp"] / 100)
+        pygame.draw.rect(win, (0, 255, 0), (player["x"], player["y"] - 10, 50 * hp_percent, 5))
+
+        # create the score text
+        score_text = font.render(f"Score: {player["score"]}", 1, (0, 0, 0))
+
+        # if we're the player, place the text in the left corner
+        # if not, place the score above the other player
+        if id == my_id:
+            win.blit(score_text, (10, 10))
+        else:
+            win.blit(score_text, (player["x"], player["y"] - 30))
         
     pygame.display.update()
 
@@ -90,8 +109,8 @@ def main():
         try:
             # send the packet and receive the game state containing data about players and bullets
             game_state = net.send(packet_to_send)
-
-            redrawWindow(win, game_state["players"], game_state["bullets"])
+    
+            redrawWindow(win, game_state["players"], game_state["bullets"], player_id)
         
         except Exception as e:
             print("Error:", e)
