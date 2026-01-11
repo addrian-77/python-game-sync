@@ -6,7 +6,7 @@ A real-time multiplayer game foundation built using **Python**, **Pygame**, and 
 
 This repository consists of three main files:
 
-* **`server.py`**: The backend server script. It binds to `localhost` on port `5555` and listens for incoming connections. It uses threading to handle multiple clients simultaneously and acts as the central source of truth for the game state.
+* **`server.py`**: The backend server script. It binds to `hotspot ip` on port `8000` and listens for incoming connections. It uses threading to handle multiple clients simultaneously and acts as the central source of truth for the game state.
 * **`game.py`**: The client-side application. It initializes the Pygame window (500x500) and handles user input and rendering. It continuously sends local coordinates to the server and receives the positions of other players.
 * **`network.py`**: A helper class that manages the socket connection. It abstracts the complexity of sending and receiving data using Python's `pickle` library for serialization.
 
@@ -22,13 +22,20 @@ pip install pygame
 
 To play the game, you must start the server first, and then run an instance of the client for each player.
 
+To play with other players, enable `hotspot` on the host device, then connect to it with the other devices.
+Make sure you change ```self.server``` in __network.py__ and ```server``` in __server.py__ with the hotspot's ip (on all devices).
+To obtain the hotspot's ip, use
+```
+hostname -I
+```
+
 ### 1. Start the Server
 Open your terminal and run the server script. This will start listening for connections.
 
 ```bash
 python server.py
 ```
-* The server runs on `localhost`, port `5555`.
+* The server runs on `hotspot ip`, port `8000`.
 
 ### 2. Start the Clients
 Open a new terminal window (one for each player) and run the game script.
@@ -54,3 +61,8 @@ The game runs at 60 FPS. Use the keyboard arrows to move your character.
 * **Networking**: The project uses `socket.AF_INET` and `socket.SOCK_STREAM` for TCP connections.
 * **Data Serialization**: The `pickle` module is used to serialize Python objects (dictionaries) so they can be sent over the network. The client sends a packet containing `{"x": x, "y": y}`, and the server responds with a dictionary containing all connected players.
 * **Threading**: The server utilizes the `_thread` module to spawn a new thread for every client that connects, ensuring the main server loop is not blocked.
+
+* ## 🎮 Gameplay
+  ![pygame](https://github.com/user-attachments/assets/75ae712b-2b1a-4617-a671-79637006fcb2)
+
+  
