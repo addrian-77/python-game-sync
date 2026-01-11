@@ -4,8 +4,8 @@ import pickle
 import time
 import random
 
-server = "localhost"
-port = 5555
+server = "10.42.0.1"
+port = 8000
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
